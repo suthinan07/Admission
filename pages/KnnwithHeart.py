@@ -18,14 +18,14 @@ X = dt.drop(['Serial No.', 'Chance of Admit ', 'AdmitClass'], axis=1)
 y = dt['AdmitClass']
 
 col1, col2 = st.columns(2)
-if st.button("ทำนายผล"):
+if st.button("ทำนายผล", key="predict_btn"):
     Knn_model = KNeighborsClassifier(n_neighbors=3)
     Knn_model.fit(X, y)
 
     x_input = np.array([[A1,A2,A3,A4,A5,A6,A7]])
     out = Knn_model.predict(x_input)
 
-    st.write("ผลลัพธ์ที่ได้จากโมเดล:", out)  # ✅ debug
+    st.write("ผลลัพธ์ที่ได้จากโมเดล:", out)  # debug
 
     if len(out) > 0 and out[0] == 1:
         st.success("🎉 มีโอกาสสูงที่จะได้รับการ Admit")
@@ -33,6 +33,7 @@ if st.button("ทำนายผล"):
     else:
         st.error("❌ โอกาสต่ำที่จะได้รับการ Admit")
         st.markdown("![Not Admit](https://cdn-icons-png.flaticon.com/512/753/753345.png)")
+
 
 
 st.subheader("ข้อมูลส่วนแรก 10 แถว")
