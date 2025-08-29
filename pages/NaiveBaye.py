@@ -30,22 +30,20 @@ A5 = st.number_input("LOR", min_value=0.0, step=0.5)
 A6 = st.number_input("CGPA", min_value=0.0, step=0.01)
 A7 = st.number_input("Research (0=No, 1=Yes)", min_value=0, max_value=1)
 
-# รวม input
-input_data = np.array([[A1, A2, A3, A4, A5, A6, A7]])
+# ปุ่มทำนาย
+if st.button("ทำนายผล", key="predict_btn"):
+    input_data = np.array([[A1, A2, A3, A4, A5, A6, A7]])
+    prediction = model.predict(input_data)
+    prediction_proba = model.predict_proba(input_data)
 
-# ทำนายผลลัพธ์
-prediction = model.predict(input_data)
-prediction_proba = model.predict_proba(input_data)
+    # แสดงผลลัพธ์
+    st.subheader("ผลลัพธ์ที่ได้:")
+    if prediction[0] == 1:
+        st.success("🎉 มีโอกาสสูงที่จะได้รับการ Admit")
+    else:
+        st.error("❌ โอกาสต่ำที่จะได้รับการ Admit")
 
-# แสดงผลลัพธ์
-st.subheader("ผลลัพธ์ที่ได้:")
-if prediction[0] == 1:
-    st.success("🎉 มีโอกาสสูงที่จะได้รับการ Admit")
-else:
-    st.error("❌ โอกาสต่ำที่จะได้รับการ Admit")
-
-# แสดงความน่าจะเป็นของแต่ละประเภท
-st.subheader("ความน่าจะเป็นของแต่ละประเภท:")
-df_proba = pd.DataFrame(prediction_proba, columns=['Not Admit (0)','Admit (1)'])
-st.dataframe(df_proba.style.format("{:.2%}"))
-
+    # แสดงความน่าจะเป็นของแต่ละประเภท
+    st.subheader("ความน่าจะเป็นของแต่ละประเภท:")
+    df_proba = pd.DataFrame(prediction_proba, columns=['Not Admit (0)','Admit (1)'])
+    st.dataframe(df_proba.style.format("{:.2%}"))
