@@ -5,30 +5,25 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-st.title('การทำนายข้อมูลโรคหัวใจด้วยเทคนิค K-Nearest Neighbor')
-#st.image("./img/kairung.jpg")
+st.title('การทำนายโอกาสการรับเข้าเรียนด้วย K-Nearest Neighbor')
+
+# โหลดข้อมูล
+dt = pd.read_csv("./data/data1.csv")
+
+# สร้าง target ใหม่ (0/1)
+dt['AdmitClass'] = (dt['Chance of Admit '] >= 0.75).astype(int)
+
+# ตัดคอลัมน์ที่ไม่ใช้
+X = dt.drop(['Serial No.', 'Chance of Admit ', 'AdmitClass'], axis=1)
+y = dt['AdmitClass']
+
 col1, col2 = st.columns(2)
-
 with col1:
-   st.header("")
-   st.image("./img/heart1.jpg")
-
+    st.image("./img/heart1.jpg", caption="Admit (โอกาสสูง)")
 with col2:
-   st.header("")
-   st.image("./img/heart2.jpg")
-
-
-html_7 = """
-<div style="background-color:#33beff;padding:15px;border-radius:15px 15px 15px 15px;border-style:'solid';border-color:black">
-<center><h4>ข้อมูลโรคหัวใจสำหรับทำนาย</h4></center>
-</div>
-"""
-st.markdown(html_7, unsafe_allow_html=True)
-st.markdown("")
-st.markdown("")
+    st.image("./img/heart2.jpg", caption="Not Admit (โอกาสต่ำ)")
 
 st.subheader("ข้อมูลส่วนแรก 10 แถว")
-dt = pd.read_csv("./data/Heart3.csv")
 st.write(dt.head(10))
 st.subheader("ข้อมูลส่วนสุดท้าย 10 แถว")
 st.write(dt.tail(10))
@@ -39,57 +34,36 @@ st.write(dt.describe())
 
 # การเลือกแสดงกราฟตามฟีเจอร์
 st.subheader("📌 เลือกฟีเจอร์เพื่อดูการกระจายข้อมูล")
-feature = st.selectbox("เลือกฟีเจอร์", dt.columns[:-1])
+feature = st.selectbox("เลือกฟีเจอร์", X.columns)
 
-# วาดกราฟ boxplot
-st.write(f"### 🎯 Boxplot: {feature} แยกตามชนิดของโรคหัวใจ")
+st.write(f"### 🎯 Boxplot: {feature} แยกตามโอกาสการ Admit")
 fig, ax = plt.subplots()
-sns.boxplot(data=dt, x='HeartDisease', y=feature, ax=ax)
+sns.boxplot(data=dt, x='AdmitClass', y=feature, ax=ax)
 st.pyplot(fig)
 
-# วาด pairplot
+# Pairplot
 if st.checkbox("แสดง Pairplot (ใช้เวลาประมวลผลเล็กน้อย)"):
     st.write("### 🌺 Pairplot: การกระจายของข้อมูลทั้งหมด")
-    fig2 = sns.pairplot(dt, hue='HeartDisease')
+    fig2 = sns.pairplot(dt.drop('Serial No.', axis=1), hue='AdmitClass')
     st.pyplot(fig2)
 
-html_8 = """
-<div style="background-color:#6BD5DA;padding:15px;border-radius:15px 15px 15px 15px;border-style:'solid';border-color:black">
-<center><h5>ทำนายข้อมูล</h5></center>
-</div>
-"""
-st.markdown(html_8, unsafe_allow_html=True)
-st.markdown("")
+st.subheader("🔮 ทำนายข้อมูลใหม่")
 
-A1 = st.number_input("กรุณาเลือกข้อมูล A1")
-A2 = st.number_input("กรุณาเลือกข้อมูล A2")
-A3 = st.number_input("กรุณาเลือกข้อมูล A3")
-A4 = st.number_input("กรุณาเลือกข้อมูล A4")
-A5 = st.number_input("กรุณาเลือกข้อมูล A5")
-A6 = st.number_input("กรุณาเลือกข้อมูล A6")
-A7 = st.number_input("กรุณาเลือกข้อมูล A7")
-A8 = st.number_input("กรุณาเลือกข้อมูล A8")
-A9 = st.number_input("กรุณาเลือกข้อมูล A9")
-A10 = st.number_input("กรุณาเลือกข้อมูล A10")
-A11 = st.number_input("กรุณาเลือกข้อมูล A11")
+A1 = st.number_input("กรุณาใส่ค่า GRE Score")
+A2 = st.number_input("กรุณาใส่ค่า TOEFL Score")
+A3 = st.number_input("กรุณาใส่ค่า University Rating")
+A4 = st.number_input("กรุณาใส่ค่า SOP")
+A5 = st.number_input("กรุณาใส่ค่า LOR")
+A6 = st.number_input("กรุณาใส่ค่า CGPA")
+A7 = st.number_input("กรุณาใส่ค่า Research (0=No, 1=Yes)")
 
 if st.button("ทำนายผล"):
-   #st.write("ทำนาย")
-   #dt = pd.read_csv("./data/iris-3.csv") 
-   X = dt.drop('HeartDisease', axis=1)
-   y = dt.HeartDisease
+    Knn_model = KNeighborsClassifier(n_neighbors=3)
+    Knn_model.fit(X, y)
 
-   Knn_model = KNeighborsClassifier(n_neighbors=3)
-   Knn_model.fit(X, y)  
-    
-   x_input = np.array([[A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11]])
-   st.write(Knn_model.predict(x_input))
-   
-   out=Knn_model.predict(x_input)
+    x_input = np.array([[A1,A2,A3,A4,A5,A6,A7]])
+    out = Knn_model.predict(x_input)
 
-   if out[0] == 1:
-    st.image("./img/heart1.jpg")
-   else:
-    st.image("./img/heart2.jpg")
-else:
-    st.write("ไม่ทำนาย")
+    if out[0] == 1:
+        st.success("🎉 มีโอกาสสูงที่จะได้รับการ Admit")
+        st.image("./img/heart
